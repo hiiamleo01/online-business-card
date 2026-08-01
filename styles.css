@@ -234,11 +234,39 @@ select {
   text-align: center;
 }
 
+/* Keep the mobile layout on tablet and desktop */
+.business-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.contact-list {
+  grid-template-columns: 1fr;
+}
+
+.card-actions {
+  grid-template-columns: 1fr;
+}
+
+.card-header {
+  padding: 32px 24px 26px;
+}
+
+.card-content {
+  padding: 24px;
+}
+
+.profile-image {
+  width: 112px;
+  height: 112px;
+}
+
+
 /* =========================
    TABLET
 ========================== */
 
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .page {
     padding: 40px;
   }
@@ -262,13 +290,13 @@ select {
   .card-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
+} */
 
 /* =========================
    DESKTOP
 ========================== */
 
-@media (min-width: 1024px) {
+/* @media (min-width: 1024px) {
   .business-card {
     max-width: 900px;
   }
@@ -277,7 +305,7 @@ select {
     width: 128px;
     height: 128px;
   }
-}
+} */
 
 /* =========================
    ACCESSIBILITY
