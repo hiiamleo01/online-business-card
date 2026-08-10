@@ -94,7 +94,7 @@ select {
   height: 112px;
   margin: 0 auto 20px;
   object-fit: cover;
-  border: 3px solid #c7d1df;
+  border: 3px solid #090909;
   border-radius: 50%;
   background: #1a2942;
 }
