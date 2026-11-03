@@ -291,11 +291,19 @@
     .single-page .base.left { display: none; }
     .single-page .paper-mesh { left: 0; width: 100%; }
     .single-page .right .page::after { background: linear-gradient(to right, #0001, transparent 6%); }
+    /* The desktop cover occupies the right half of the spread canvas,
+       shifted to the center. Opening moves the binding into position. */
+    .book:not(.single-page) { transform: translateX(var(--cover-offset, 0%)); }
+    .book:not(.single-page)::before { left: var(--back-left, -5px); right: var(--back-right, -5px); }
+    .book.cover-only .left { visibility: hidden; }
+    .book.cover-only .turn.prev { visibility: hidden; }
+    .book.back-cover-only .right { visibility: hidden; }
+    .book.back-cover-only .turn.next { visibility: hidden; }
   </style>
 </head>
 
 <body>
-  <main class="book" aria-label="18-page open magazine">
+  <main class="book" aria-label="Magazine with front cover, interior spreads, and back cover">
     <div id="left" class="base left"></div>
     <div id="right" class="base right"></div>
     <button id="previous" class="turn prev" aria-label="Previous two pages" title="Previous pages (←)"></button>
@@ -310,7 +318,7 @@
        Each image uses its original proportions without stretching or cropping.
     */
     const pageImages = [ "pages/page-16.png","pages/page-0.1.png",
-      "pages/page-01.png", "pages/page-02.png", "pages/page-03.png", "pages/page-04.png", "pages/page-05.png", "pages/page-06.png", "pages/page-07.png", "pages/page-08.png", "pages/page-09.png", "pages/page-10.png", "pages/page-11.png", "pages/page-12.png", "pages/page-13.png", "pages/page-14.png", "pages/page-15.png", "pages/page-16.png"
+      "pages/page-01.png", "pages/page-02.png", "pages/page-03.png", "pages/page-04.png", "pages/page-05.png", "pages/page-06.png", "pages/page-07.png", "pages/page-08.png", "pages/page-09.png", "pages/page-10.png", "pages/page-11.png", "pages/page-12.png", "pages/page-13.png", "pages/page-14.png", "pages/page-15.png", "pages/page-00.png", "pages/page-16.png"
     ];
 
     const titles = [
@@ -384,10 +392,20 @@
 
     function drawSpread() {
       book.classList.toggle('single-page', singlePage);
-      const first = spread * stepSize();
-      if (singlePage) {
+      const cover = !singlePage && spread === 0;
+      const backCover = !singlePage && spread === Math.ceil(pageImages.length / 2) - 1;
+      book.classList.toggle('cover-only', cover);
+      book.classList.toggle('back-cover-only', backCover);
+      book.style.setProperty('--cover-offset', cover ? '-25%' : backCover ? '25%' : '0%');
+      book.style.setProperty('--back-left', cover ? '50%' : '-5px');
+      book.style.setProperty('--back-right', backCover ? '50%' : '-5px');
+      const first = cover ? 1 : spread * stepSize();
+      if (singlePage || cover) {
         left.replaceChildren();
         right.replaceChildren(makePage(first));
+      } else if (backCover) {
+        left.replaceChildren(makePage(first));
+        right.replaceChildren();
       } else {
         left.replaceChildren(makePage(first));
         right.replaceChildren(makePage(first + 1));
@@ -398,12 +416,13 @@
       next.setAttribute('aria-label', singlePage ? 'Next page' : 'Next two pages');
       document.getElementById('status').textContent = singlePage
         ? 'Page ' + first + ' of ' + (pageImages.length - 1)
-        : 'Pages ' + (first + 1) + ' and ' + Math.min(first + 2, pageImages.length) + ' of ' + pageImages.length;
+        : cover ? 'Front cover' : backCover ? 'Back cover' : 'Pages ' + (first + 1) + ' and ' + Math.min(first + 2, pageImages.length) + ' of ' + pageImages.length;
     }
 
     // Preserve the reading position when rotating or resizing the screen.
     function resizeReader() {
-      const page = (pendingTarget === null ? spread : pendingTarget) * stepSize();
+      const position = pendingTarget === null ? spread : pendingTarget;
+      const page = !singlePage && position === 0 ? 1 : position * stepSize();
       cancelAnimationFrame(animationId);
       book.querySelectorAll('.paper-mesh, .turn-shadow').forEach(node => node.remove());
       turning = false;
@@ -431,6 +450,11 @@ function turn(direction) {
     pendingTarget = null;
     return;
   }
+  const openingCover = !singlePage && spread === 0;
+  const closingCover = !singlePage && target === 0;
+  const closingBackCover = !singlePage && target === lastSpread;
+  const openingBackCover = !singlePage && spread === lastSpread;
+  book.classList.remove('cover-only', 'back-cover-only');
   const width = book.clientWidth / stepSize();
   const height = book.clientHeight;
   const segmentCount = 24;
@@ -464,6 +488,16 @@ function turn(direction) {
     strips.push(strip);
   }
   function pose(progress) {
+    if (openingCover || closingCover) {
+      const closed = openingCover ? 1 - progress : progress;
+      book.style.setProperty('--cover-offset', (-25 * closed) + '%');
+      book.style.setProperty('--back-left', (50 * closed) + '%');
+    }
+    if (closingBackCover || openingBackCover) {
+      const closed = closingBackCover ? progress : 1 - progress;
+      book.style.setProperty('--cover-offset', (25 * closed) + '%');
+      book.style.setProperty('--back-right', (50 * closed) + '%');
+    }
     const t = direction > 0 ? progress : 1 - progress;
     const bend = Math.sin(Math.PI * t) * 1.50 * direction;
     let x = 0, z = 0;
@@ -481,8 +515,16 @@ function turn(direction) {
   pose(0);
   book.append(shadow, mesh);
   if (singlePage) right.replaceChildren(makePage(direction > 0 ? target : spread));
+  else if (closingBackCover) right.replaceChildren();
+  else if (openingBackCover) {
+    left.replaceChildren(makePage(target * 2));
+    right.replaceChildren(makePage(target * 2 + 1));
+  }
   else if (direction > 0) right.replaceChildren(makePage(target * 2 + 1));
-  else left.replaceChildren(makePage(target * 2));
+  else if (closingCover) {
+    left.replaceChildren();
+    right.replaceChildren(makePage(1));
+  } else left.replaceChildren(makePage(target * 2));
   let start;
   function frame(now) {
     if (start === undefined) start = now;
