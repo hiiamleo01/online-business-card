@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BSTAR — Bifold Magazine</title>
+  <style>
+    /* Change these colors to match your magazine. */
+    :root {
+      --paper: #f1ecdf;
+      --navy: #122c3b;
+      --gold: #bd9a5c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      background: radial-gradient(ellipse at center, #313d47, #141b22 75%);
+    }
+
+    /* Two portrait A4 pages (210 × 297 mm each): open spread ratio 420 / 297.
+   Scales to the viewport while preserving A4 proportions on both sides. */
+    .book {
+      position: relative;
+      width: min(90vw, 127.27vh, 1400px);
+      aspect-ratio: 420 / 297;
+      perspective: 2500px;
+      filter: drop-shadow(0 24px 25px #0007);
+      isolation: isolate;
+    }
+
+    .book::before {
+      content: "";
+      position: absolute;
+      inset: 3px -5px -6px;
+      background: #d0cabd;
+      border-radius: 2px;
+      box-shadow: 0 2px #a69e8f, 0 4px #d9d3c5;
+    }
+
+    .base {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+    }
+
+    .left {
+      left: 0;
+    }
+
+    .right {
+      right: 0;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--navy);
+      container-type: inline-size;
+    }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .left .page::after {
+      background: linear-gradient(to left, #0002, transparent 10%);
+    }
+
+    .right .page::after {
+      background: linear-gradient(to right, #0002, transparent 10%);
+    }
+
+    .content {
+      height: 100%;
+      padding: 8%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .kicker {
+      font: 2.2cqw Arial, sans-serif;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font: 19cqw/.95 Georgia, serif;
+      letter-spacing: -.04em;
+      margin: 8% 0 4%;
+    }
+
+    h2 {
+      font: 11cqw/1.04 Georgia, serif;
+      letter-spacing: -.04em;
+      margin: 8% 0 5%;
+    }
+
+    h3 {
+      font: 8cqw/1.03 Georgia, serif;
+      margin: 5% 0;
+      font-weight: normal;
+    }
+
+    p {
+      font: 3.3cqw/1.65 Georgia, serif;
+      margin: 3% 0;
+    }
+
+    .folio {
+      margin-top: auto;
+      padding-top: 4%;
+      border-top: 1px solid #bd9a5c77;
+      display: flex;
+      justify-content: space-between;
+      font: 2cqw Arial, sans-serif;
+      letter-spacing: .16em;
+    }
+
+    .dark {
+      color: #e9ddc2;
+      background: var(--navy);
+    }
+
+    .dark .content {
+      background: radial-gradient(ellipse at 80% 50%, #4c77733d, transparent 70%);
+    }
+
+    .rule {
+      border-top: 1px solid #bd9a5c88;
+      padding-top: 4%;
+      font: 2.2cqw Arial;
+      letter-spacing: .25em;
+    }
+
+    .sculpture {
+      position: relative;
+      flex: 1;
+      min-height: 26%;
+      display: grid;
+      place-items: center;
+      margin: 3% 0;
+    }
+
+    .ring {
+      position: absolute;
+      width: 55%;
+      aspect-ratio: 1;
+      border: 1.6cqw solid #bca16c;
+      border-radius: 50%;
+      transform: rotate(-30deg) skewY(-12deg);
+      box-shadow: inset .7cqw .7cqw 1cqw #f4e3b9, 1cqw 2cqw 3cqw #0005;
+    }
+
+    .ring:nth-child(2) {
+      width: 44%;
+      transform: rotate(35deg) skewX(22deg);
+      border-color: #deca9e;
+    }
+
+    .ring:nth-child(3) {
+      width: 29%;
+      transform: rotate(-20deg) skewX(-20deg);
+    }
+
+    .art {
+      height: 42%;
+      margin: 5% 0;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 1;
+      background: linear-gradient(140deg, #8aaba8, #375765 60%, #182d3c);
+    }
+
+    .art::before,
+    .art::after {
+      content: "";
+      position: absolute;
+      width: 70%;
+      height: 160%;
+      border: 2cqw solid #d1bb8e;
+      border-radius: 50% 50% 0 0;
+      top: 13%;
+      left: 8%;
+      transform: rotate(30deg);
+      box-shadow: 1cqw 1cqw 5cqw #0004;
+    }
+
+    .art::after {
+      left: 45%;
+      border-color: #d7d3b877;
+    }
+
+    .number {
+      font: 24cqw/1 Georgia;
+      color: var(--gold);
+      margin-top: 8%;
+    }
+
+    .quote {
+      font: 8cqw/1.2 Georgia;
+      color: var(--gold);
+      margin: 10% 0;
+    }
+
+    .page-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--paper);
+    }
+
+/* Curved paper is rendered as a continuous series of two-sided strips. */
+.paper-mesh { position:absolute; left:50%; top:0; width:50%; height:100%; transform-style:preserve-3d; z-index:5; pointer-events:none; }
+.paper-strip { position:absolute; top:0; height:100%; transform-origin:left center; transform-style:preserve-3d; will-change:transform; }
+.paper-face { transform:translateZ(0.2px); position:absolute; inset:0; overflow:hidden; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+.paper-face.reverse { transform:rotateY(180deg) translateZ(0.2px); }
+.paper-face::after { content:""; position:absolute; inset:0; background:#000; opacity:var(--shade,0); pointer-events:none; }
+.paper-face .page { right:auto; }
+.turn-shadow { position:absolute; inset:0; pointer-events:none; z-index:3; background:linear-gradient(90deg,transparent 15%,#0008 50%,transparent 85%); opacity:0; }
+    /* Invisible hit areas: click the right page to advance, left to go back. */
+    .turn {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      z-index: 10;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .turn.prev {
+      left: 0;
+    }
+
+    .turn.next {
+      right: 0;
+    }
+
+    .turn:disabled {
+      cursor: default;
+    }
+
+    .turn:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 5px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+
+    /* Phones: one portrait A4 page. Desktop keeps the open spread. */
+    .book.single-page {
+      width: min(92vw, 63.63vh, 700px);
+      width: min(92vw, 63.63svh, 700px);
+      aspect-ratio: 210 / 297;
+      overflow: hidden;
+      touch-action: pan-y pinch-zoom;
+    }
+    .single-page .base { width: 100%; }
+    .single-page .base.left { display: none; }
+    .single-page .paper-mesh { left: 0; width: 100%; }
+    .single-page .right .page::after { background: linear-gradient(to right, #0001, transparent 6%); }
+  </style>
+</head>
+
+<body>
+  <main class="book" aria-label="18-page open magazine">
+    <div id="left" class="base left"></div>
+    <div id="right" class="base right"></div>
+    <button id="previous" class="turn prev" aria-label="Previous two pages" title="Previous pages (←)"></button>
+    <button id="next" class="turn next" aria-label="Next two pages" title="Next pages (→)"></button>
+  </main>
+  <div id="status" class="sr-only" aria-live="polite"></div>
+  <script>
+    /* YOUR MAGAZINE IMAGES
+       Replace the empty strings below with your page image paths, for example:
+       "pages/page-01.jpg", "pages/page-02.jpg", etc.
+       Leave a string empty to display its sample layout.
+       Each image uses its original proportions without stretching or cropping.
+    */
+    const pageImages = [ "pages/page-16.png","pages/page-0.1.png",
+      "pages/page-01.png", "pages/page-02.png", "pages/page-03.png", "pages/page-04.png", "pages/page-05.png", "pages/page-06.png", "pages/page-07.png", "pages/page-08.png", "pages/page-09.png", "pages/page-10.png", "pages/page-11.png", "pages/page-12.png", "pages/page-13.png", "pages/page-14.png", "pages/page-15.png", "pages/page-16.png"
+    ];
+
+    const titles = [
+      'A new perspective', 'The opening note', 'The art of arrival', 'Details that matter',
+      'A quieter rhythm', 'Spaces to discover', 'The golden hour', 'At the table',
+      'After dark', 'The city edit', 'A personal touch', 'Room to explore',
+      'Your next chapter', 'The collection', 'Until next time', 'A new beginning'
+    ];
+    const copy = [
+      '',
+      'Every journey begins with a fresh perspective. This edition is an invitation to pause, explore and discover the beauty in the details.',
+      'A welcoming space. A thoughtful gesture. A moment to settle in. First impressions are shaped by the small details that make a place feel special.',
+      'A warm material, an elegant curve, a carefully placed light. Good design connects what we see with how we feel.',
+      'Make room for a slower pace. Set aside the schedule and leave a little space for the unexpected.',
+      'Architecture shapes an experience before a word is spoken. Discover the connection between generous spaces, light and human connection.',
+      'As daylight softens, familiar places reveal another side. Warm reflections turn an ordinary moment into something worth remembering.',
+      'A shared table is a place for conversation, discovery and the pleasure of taking your time. Some stories begin with a simple meal.',
+      'When the light changes, so does the mood. An evening unfolds through music, conversation and a different view of the city.',
+      'Take the long way. Follow a new street, look up at the skyline, and find a corner of the city that feels entirely your own.',
+      'The most memorable experiences feel personal. Small, thoughtful details transform a visit into a story.',
+      'Leave a little room for curiosity. The most unexpected discoveries often become the moments we remember best.',
+      'There is always another place to discover, another idea to explore, another page to turn. Where will your curiosity take you next?',
+      'A collection of spaces, textures and moments. A different perspective, gathered together in one considered edition.',
+      'Thank you for exploring this sample edition. Replace these sample pages with your finished artwork to make this magazine your own.',
+      ''
+    ];
+
+    const book = document.querySelector('.book');
+    const left = document.getElementById('left');
+    const right = document.getElementById('right');
+    const previous = document.getElementById('previous');
+    const next = document.getElementById('next');
+    // At widths below 768px, each navigation step is one page.
+    const mobileQuery = matchMedia('(max-width: 767px)');
+    let singlePage = mobileQuery.matches;
+    let spread = singlePage ? 1 : 0; // Mobile skips the opening back-cover image.
+    let animationId = 0;
+    let pendingTarget = null;
+    const stepSize = () => singlePage ? 1 : 2;
+    let turning = false;
+
+    function makePage(index) {
+      const page = document.createElement('article');
+      page.className = 'page' + (index % 4 === 0 || index === 15 ? ' dark' : '');
+      page.setAttribute('aria-label', 'Page ' + (index + 1));
+      if (pageImages[index]) {
+        const image = new Image();
+        image.className = 'page-image';
+        image.alt = 'Magazine page ' + (index + 1);
+        image.src = pageImages[index];
+        page.append(image);
+        return page;
+      }
+      const folio = '<div class="folio"><span>BSTAR / THE COLLECTION</span><span>' + String(index + 1).padStart(2, '0') + '</span></div>';
+      const rings = '<div class="sculpture"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>';
+      let body;
+      if (index === 0) {
+        body = '<div class="kicker">The collection / Volume 01</div><h1>BSTAR</h1><div class="rule">PLACES · PEOPLE · POSSIBILITIES</div>' + rings + '<h3>A new<br><em>perspective.</em></h3><p>The design edition</p>';
+      } else if (index === 15) {
+        body = '<div class="kicker">The collection / Volume 01</div>' + rings + '<h2>Every ending.<br><em>A new beginning.</em></h2><p>BSTAR</p>';
+      } else {
+        body = '<div class="kicker">' + (index < 6 ? 'Discover' : index < 12 ? 'Experience' : 'Reflect') + ' / The collection</div>';
+        if (index % 4 === 1) body += '<div class="number">' + String(index + 1).padStart(2, '0') + '</div>';
+        body += '<h2>' + titles[index] + '.</h2>';
+        body += index % 4 === 2 ? '<div class="quote">“Find the extraordinary in the everyday.”</div>' : '<div class="art"></div>';
+        body += '<p>' + copy[index] + '</p>';
+      }
+      page.innerHTML = '<div class="content">' + body + folio + '</div>';
+      return page;
+    }
+
+    function drawSpread() {
+      book.classList.toggle('single-page', singlePage);
+      const first = spread * stepSize();
+      if (singlePage) {
+        left.replaceChildren();
+        right.replaceChildren(makePage(first));
+      } else {
+        left.replaceChildren(makePage(first));
+        right.replaceChildren(makePage(first + 1));
+      }
+      previous.disabled = spread === (singlePage ? 1 : 0);
+      next.disabled = spread === Math.ceil(pageImages.length / stepSize()) - 1;
+      previous.setAttribute('aria-label', singlePage ? 'Previous page' : 'Previous two pages');
+      next.setAttribute('aria-label', singlePage ? 'Next page' : 'Next two pages');
+      document.getElementById('status').textContent = singlePage
+        ? 'Page ' + first + ' of ' + (pageImages.length - 1)
+        : 'Pages ' + (first + 1) + ' and ' + Math.min(first + 2, pageImages.length) + ' of ' + pageImages.length;
+    }
+
+    // Preserve the reading position when rotating or resizing the screen.
+    function resizeReader() {
+      const page = (pendingTarget === null ? spread : pendingTarget) * stepSize();
+      cancelAnimationFrame(animationId);
+      book.querySelectorAll('.paper-mesh, .turn-shadow').forEach(node => node.remove());
+      turning = false;
+      pendingTarget = null;
+      singlePage = mobileQuery.matches;
+      spread = Math.max(singlePage ? 1 : 0, Math.floor(page / stepSize()));
+      drawSpread();
+    }
+    window.addEventListener('resize', resizeReader);
+    mobileQuery.addEventListener('change', resizeReader);
+
+// Adjust this to change the page-turn speed (milliseconds).
+const FLIP_DURATION = 1350;
+
+function turn(direction) {
+  const lastSpread = Math.ceil(pageImages.length / stepSize()) - 1;
+  if (turning || spread + direction < (singlePage ? 1 : 0) || spread + direction > lastSpread) return;
+  turning = true;
+  const target = spread + direction;
+  pendingTarget = target;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    spread = target;
+    drawSpread();
+    turning = false;
+    pendingTarget = null;
+    return;
+  }
+  const width = book.clientWidth / stepSize();
+  const height = book.clientHeight;
+  const segmentCount = 24;
+  const segmentWidth = width / segmentCount;
+  const mesh = document.createElement('div');
+  mesh.className = 'paper-mesh';
+  mesh.setAttribute('aria-hidden', 'true');
+  const shadow = document.createElement('div');
+  shadow.className = 'turn-shadow';
+  const frontIndex = singlePage ? (direction > 0 ? spread : target) : (direction > 0 ? spread * 2 + 1 : target * 2 + 1);
+  const backIndex = direction > 0 ? target * 2 : spread * 2;
+  const frontPage = makePage(frontIndex);
+  const backPage = singlePage ? document.createElement('article') : makePage(backIndex);
+  if (singlePage) backPage.className = 'page';
+  const strips = [];
+  for (let i = 0; i < segmentCount; i++) {
+    const strip = document.createElement('div');
+    strip.className = 'paper-strip';
+    strip.style.width = (segmentWidth + 0.8) + 'px';
+    for (const reverse of [false, true]) {
+      const face = document.createElement('div');
+      face.className = 'paper-face' + (reverse ? ' reverse' : '');
+      const page = (reverse ? backPage : frontPage).cloneNode(true);
+      page.style.width = width + 'px';
+      page.style.height = height + 'px';
+      page.style.left = -(reverse ? width - (i + 1) * segmentWidth : i * segmentWidth) + 'px';
+      face.append(page);
+      strip.append(face);
+    }
+    mesh.append(strip);
+    strips.push(strip);
+  }
+  function pose(progress) {
+    const t = direction > 0 ? progress : 1 - progress;
+    const bend = Math.sin(Math.PI * t) * 1.50 * direction;
+    let x = 0, z = 0;
+    strips.forEach((strip, i) => {
+      // Curvature travels from the binding to the outer edge and settles flat.
+      const u = (i + 0.5) / segmentCount;
+      const angle = -Math.PI * t + bend * (u - 0.25);
+      strip.style.transform = 'translate3d(' + x + 'px,0,' + z + 'px) rotateY(' + angle + 'rad)';
+      strip.style.setProperty('--shade', Math.sin(Math.PI * t) * (0.04 + 0.15 * u));
+      x += segmentWidth * Math.cos(angle);
+      z -= segmentWidth * Math.sin(angle);
+    });
+    shadow.style.opacity = Math.sin(Math.PI * t) * 0.55;
+  }
+  pose(0);
+  book.append(shadow, mesh);
+  if (singlePage) right.replaceChildren(makePage(direction > 0 ? target : spread));
+  else if (direction > 0) right.replaceChildren(makePage(target * 2 + 1));
+  else left.replaceChildren(makePage(target * 2));
+  let start;
+  function frame(now) {
+    if (start === undefined) start = now;
+    const elapsed = Math.min(1, (now - start) / FLIP_DURATION);
+    // Smootherstep: gradual lift, continuous motion, and a soft landing.
+    const progress = elapsed * elapsed * elapsed * (elapsed * (elapsed * 6 - 15) + 10);
+    pose(progress);
+    if (elapsed < 1) animationId = requestAnimationFrame(frame);
+    else {
+      spread = target;
+      drawSpread();
+      mesh.remove();
+      shadow.remove();
+      turning = false;
+      pendingTarget = null;
+    }
+  }
+  animationId = requestAnimationFrame(frame);
+}
+
+    previous.addEventListener('click', () => turn(-1));
+    next.addEventListener('click', () => turn(1));
+    document.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        turn(event.key === 'ArrowRight' ? 1 : -1);
+      }
+    });
+
+    // Swipe support. Suppress the click generated after a completed swipe.
+    let touchX = null;
+    let swiped = false;
+    book.addEventListener('touchstart', event => {
+      touchX = event.changedTouches[0].clientX;
+      swiped = false;
+    }, { passive: true });
+    book.addEventListener('touchend', event => {
+      if (touchX === null) return;
+      const delta = event.changedTouches[0].clientX - touchX;
+      if (Math.abs(delta) > 45) {
+        swiped = true;
+        turn(delta < 0 ? 1 : -1);
+      }
+      touchX = null;
+    }, { passive: true });
+    book.addEventListener('click', event => {
+      if (swiped) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        swiped = false;
+      }
+    }, true);
+
+    // Preload supplied artwork for smooth page turns.
+    pageImages.filter(Boolean).forEach(src => { const image = new Image(); image.src = src; });
+    drawSpread();
+  </script>
+</body>
+
+</html>
