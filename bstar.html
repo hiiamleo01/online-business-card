@@ -257,7 +257,7 @@
       width: 30%;
       background: linear-gradient(90deg, transparent, #ffffff75, transparent);
       transform: skewX(-25deg);
-      animation: button-shine 1.5s ease-in-out infinite;
+      animation: button-shine 5.5s ease-in-out infinite;
       pointer-events: none
     }
 
@@ -437,7 +437,7 @@
       left: -70%;
       background: linear-gradient(90deg, transparent, #fff9, transparent);
       transform: skewX(-25deg);
-      animation: button-shine 1.5s ease-in-out infinite
+      animation: button-shine 2.5s ease-in-out infinite
     }
 
     .reward-two .reward-glint:after {
@@ -546,7 +546,7 @@
       width: 25%;
       background: linear-gradient(90deg, transparent, #fff8, transparent);
       transform: skewX(-25deg);
-      animation: button-shine 1.5s ease-in-out infinite
+      animation: button-shine 2.5s ease-in-out infinite
     }
 
     .page-footer {
@@ -945,29 +945,28 @@
       <img class="panel-art" src="assets/venue.webp" width="860" height="1138" alt="" fetchpriority="high">
       <h2 id="venues-title" class="sr-only">实体场馆 尊贵汇聚</h2>
       <p class="sr-only">汇聚优质实体场馆资源，呈现多元尊贵体验。三大优势：实时连线、公平公正、现场可验。</p>
+
+      <!-- Square 1 -->
       <button class="art-button feature feature-one" data-detail="live-feature" aria-label="实时连线：现场同步，精彩零距离"
         style="overflow: hidden;">
-        <span aria-hidden="true" style="
-      position: absolute;
-      top: -50%;
-      left: -65%;
-      width: 30%;
-      height: 200%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.75),
-        transparent
-      );
-      transform: skewX(-25deg);
-      animation: button-shine 2.5s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 2;
-    "></span>
+        <span aria-hidden="true"
+          style="position:absolute; top:-50%; left:-65%; width:30%; height:200%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.75),transparent); transform:skewX(-25deg); animation:button-shine 2.5s ease-in-out infinite; pointer-events:none; z-index:2;"></span>
       </button>
-      <button class="art-button feature feature-two" data-detail="fair-feature" aria-label="公平公正：过程看得见，公平更安心"></button>
-      <button class="art-button feature feature-three" data-detail="verify-feature"
-        aria-label="现场可验：真实现场依据，透明可核实"></button>
+
+      <!-- Square 2 -->
+      <button class="art-button feature feature-two" data-detail="fair-feature" aria-label="公平公正：过程看得见，公平更安心"
+        style="overflow: hidden;">
+        <span aria-hidden="true"
+          style="position:absolute; top:-50%; left:-65%; width:30%; height:200%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.75),transparent); transform:skewX(-25deg); animation:button-shine 2.5s ease-in-out infinite; pointer-events:none; z-index:2;"></span>
+      </button>
+
+      <!-- Square 3 -->
+      <button class="art-button feature feature-three" data-detail="verify-feature" aria-label="现场可验：真实现场依据，透明可核实"
+        style="overflow: hidden;">
+        <span aria-hidden="true"
+          style="position:absolute; top:-50%; left:-65%; width:30%; height:200%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.75),transparent); transform:skewX(-25deg); animation:button-shine 2.5s ease-in-out infinite; pointer-events:none; z-index:2;"></span>
+      </button>
+      
     </section>
 
     <section class="art-section rewards" id="rewards" aria-labelledby="rewards-title">
