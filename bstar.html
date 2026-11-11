@@ -921,7 +921,16 @@
         </g>
       </svg>
       <div class="hero-copy">
-        <h1 id="hero-title"><span>尊贵</span><span>尽在眼前</span></h1>
+        <h1 id="hero-title" style="margin: 0; font-size: 0; line-height: 0; filter: none;">
+          <img src="assets/hero-title.png" alt="尊贵 尽在眼前" style="
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 2 / 1;
+      object-fit: cover;
+      object-position: center;
+    ">
+        </h1>
         <div class="gold-stroke" aria-hidden="true"></div>
         <p>一屏连线实体现场<br>精彩与尊享同步登场</p>
         <a class="gold-button hero-cta" href="#rewards">开启尊享体验 <span aria-hidden="true">▸</span></a>
@@ -966,7 +975,7 @@
         <span aria-hidden="true"
           style="position:absolute; top:-50%; left:-65%; width:30%; height:200%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.75),transparent); transform:skewX(-25deg); animation:button-shine 2.5s ease-in-out infinite; pointer-events:none; z-index:2;"></span>
       </button>
-      
+
     </section>
 
     <section class="art-section rewards" id="rewards" aria-labelledby="rewards-title">
@@ -983,8 +992,11 @@
     </section>
 
     <section class="art-section benefits" aria-labelledby="benefits-title">
-      <img class="panel-art" src="assets/benefits.webp" width="860" height="886" alt="身着紫金礼服的博星女主，周围环绕礼盒与金币"
-        loading="lazy">
+      <video class="panel-art" width="860" height="886" autoplay muted loop playsinline preload="metadata"
+        poster="assets/benefits.webp" aria-label="身着紫金礼服的博星女主，周围环绕礼盒与金币"
+        style="display: block; width: 100%; height: auto;">
+        <source src="assets/benefits.mp4" type="video/mp4">
+      </video>
       <h2 id="benefits-title" class="sr-only">入会即享多重福利，精彩不停</h2>
       <p class="sr-only">高额回馈、多重奖励、专属礼遇。</p>
       <span class="ambient-spark spark-a" aria-hidden="true">✦</span><span class="ambient-spark spark-b"
