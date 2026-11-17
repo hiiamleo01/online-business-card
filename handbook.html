@@ -250,11 +250,24 @@
       gap: 26px;
     }
     .navigation {
-      display: flex;
+      display: none;
       justify-content: center;
       gap: 16px;
       position: relative;
       z-index: 20;
+    }
+    .page-hint {
+      margin: 0;
+      padding: 0 20px;
+      color: var(--paper);
+      font: 15px/1.6 Arial, sans-serif;
+      text-align: center;
+    }
+    .book:not(.single-page) .base { cursor: pointer; }
+    .book:focus-visible { outline: 2px solid var(--gold); outline-offset: 10px; }
+    @media (max-width: 767px) {
+      .navigation { display: flex; }
+      .page-hint { display: none; }
     }
     .turn {
       min-width: 120px;
@@ -310,6 +323,7 @@
     <div id="left" class="base left"></div>
     <div id="right" class="base right"></div>
   </main>
+  <p id="page-hint" class="page-hint" lang="zh-Hant">點擊或輕觸左頁返回上一頁，右頁前往下一頁。</p>
   <nav class="navigation" aria-label="Magazine navigation">
     <button type="button" id="previous" class="turn prev">← 上一页</button>
     <button type="button" id="next" class="turn next">下一页 →</button>
@@ -398,6 +412,9 @@
 
     function drawSpread() {
       book.classList.toggle('single-page', singlePage);
+      book.tabIndex = singlePage ? -1 : 0;
+      if (singlePage) book.removeAttribute('aria-describedby');
+      else book.setAttribute('aria-describedby', 'page-hint');
       const cover = !singlePage && spread === 0;
       const backCover = !singlePage && spread === Math.ceil(pageImages.length / 2) - 1;
       book.classList.toggle('cover-only', cover);
@@ -555,7 +572,16 @@ function turn(direction) {
 
     previous.addEventListener('click', () => turn(-1));
     next.addEventListener('click', () => turn(1));
-    // Only these two buttons turn pages. Native zooming and panning remain available.
+    // Desktop: click/tap the left or right page. Mobile keeps its buttons.
+    left.addEventListener('click', () => { if (!singlePage) turn(-1); });
+    right.addEventListener('click', () => { if (!singlePage) turn(1); });
+    book.addEventListener('keydown', event => {
+      if (singlePage || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        turn(event.key === 'ArrowLeft' ? -1 : 1);
+      }
+    });
 
     // Preload supplied artwork for smooth page turns.
     pageImages.filter(Boolean).forEach(src => { const image = new Image(); image.src = src; });
