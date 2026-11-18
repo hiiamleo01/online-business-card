@@ -235,20 +235,69 @@
       background: var(--paper);
     }
 
-/* Curved paper is rendered as a continuous series of two-sided strips. */
-.paper-mesh { position:absolute; left:50%; top:0; width:50%; height:100%; transform-style:preserve-3d; z-index:5; pointer-events:none; }
-.paper-strip { position:absolute; top:0; height:100%; transform-origin:left center; transform-style:preserve-3d; will-change:transform; }
-.paper-face { transform:translateZ(0.2px); position:absolute; inset:0; overflow:hidden; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
-.paper-face.reverse { transform:rotateY(180deg) translateZ(0.2px); }
-.paper-face::after { content:""; position:absolute; inset:0; background:#000; opacity:var(--shade,0); pointer-events:none; }
-.paper-face .page { right:auto; }
-.turn-shadow { position:absolute; inset:0; pointer-events:none; z-index:3; background:linear-gradient(90deg,transparent 15%,#0008 50%,transparent 85%); opacity:0; }
+    /* Curved paper is rendered as a continuous series of two-sided strips. */
+    .paper-mesh {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      transform-style: preserve-3d;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .paper-strip {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .paper-face {
+      transform: translateZ(0.2px);
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .paper-face.reverse {
+      transform: rotateY(180deg) translateZ(0.2px);
+    }
+
+    .paper-face::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: var(--shade, 0);
+      pointer-events: none;
+    }
+
+    .paper-face .page {
+      right: auto;
+    }
+
+    .turn-shadow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      background: linear-gradient(90deg, transparent 15%, #0008 50%, transparent 85%);
+      opacity: 0;
+    }
+
     .reader {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 26px;
     }
+
     .page-hint {
       margin: 0;
       padding: 0 20px;
@@ -258,13 +307,34 @@
       text-align: center;
       white-space: pre-line;
     }
-    .book .base { cursor: pointer; }
-    .book.zoomed { touch-action: auto; }
-    .book.zoomed .base { cursor: grab; }
-    .book:focus-visible { outline: 2px solid var(--gold); outline-offset: 10px; }
+
+    .book .base {
+      cursor: pointer;
+    }
+
+    .book.zoomed {
+      touch-action: auto;
+    }
+
+    .book.zoomed .base {
+      cursor: grab;
+    }
+
+    .book:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 10px;
+    }
+
     @media (max-width: 767px) {
-      .reader { gap: 18px; }
-      .page-hint { padding: 0 12px; font-size: 13px; min-height: 4.8em; }
+      .reader {
+        gap: 18px;
+      }
+
+      .page-hint {
+        padding: 0 12px;
+        font-size: 13px;
+        min-height: 4.8em;
+      }
     }
 
     .sr-only {
@@ -283,26 +353,53 @@
       aspect-ratio: 210 / 297;
       overflow: hidden;
     }
-    .single-page .base { width: 100%; }
-    .single-page .base.left { display: none; }
-    .single-page .paper-mesh { left: 0; width: 100%; }
-    .single-page .right .page::after { background: linear-gradient(to right, #0001, transparent 6%); }
+
+    .single-page .base {
+      width: 100%;
+    }
+
+    .single-page .base.left {
+      display: none;
+    }
+
+    .single-page .paper-mesh {
+      left: 0;
+      width: 100%;
+    }
+
+    .single-page .right .page::after {
+      background: linear-gradient(to right, #0001, transparent 6%);
+    }
+
     /* The desktop cover occupies the right half of the spread canvas,
        shifted to the center. Opening moves the binding into position. */
-    .book:not(.single-page) { transform: translateX(var(--cover-offset, 0%)); }
-    .book:not(.single-page)::before { left: var(--back-left, -5px); right: var(--back-right, -5px); }
-    .book.cover-only .left { visibility: hidden; }
-    .book.back-cover-only .right { visibility: hidden; }
+    .book:not(.single-page) {
+      transform: translateX(var(--cover-offset, 0%));
+    }
+
+    .book:not(.single-page)::before {
+      left: var(--back-left, -5px);
+      right: var(--back-right, -5px);
+    }
+
+    .book.cover-only .left {
+      visibility: hidden;
+    }
+
+    .book.back-cover-only .right {
+      visibility: hidden;
+    }
   </style>
 </head>
 
 <body>
   <div class="reader">
-  <main class="book" tabindex="0" aria-describedby="page-hint" aria-label="Magazine with front cover, interior spreads, and back cover">
-    <div id="left" class="base left"></div>
-    <div id="right" class="base right"></div>
-  </main>
-  <p id="page-hint" class="page-hint" lang="zh-Hant-TW">點擊或輕觸左頁返回上一頁，右頁前往下一頁。</p>
+    <main class="book" tabindex="0" aria-describedby="page-hint"
+      aria-label="Magazine with front cover, interior spreads, and back cover">
+      <div id="left" class="base left"></div>
+      <div id="right" class="base right"></div>
+    </main>
+    <p id="page-hint" class="page-hint" lang="zh-Hant-TW">點擊或輕觸左頁返回上一頁，右頁前往下一頁。</p>
   </div>
   <div id="status" class="sr-only" aria-live="polite"></div>
   <script>
@@ -312,7 +409,7 @@
        Leave a string empty to display its sample layout.
        Each image uses its original proportions without stretching or cropping.
     */
-    const pageImages = [ "pages/page-16.png","pages/page-0.1.png",
+    const pageImages = ["pages/page-16.png", "pages/page-0.1.png",
       "pages/page-01.png", "pages/page-02.png", "pages/page-03.png", "pages/page-04.png", "pages/page-05.png", "pages/page-06.png", "pages/page-07.png", "pages/page-08.png", "pages/page-09.png", "pages/page-10.png", "pages/page-11.png", "pages/page-12.png", "pages/page-13.png", "pages/page-14.png", "pages/page-15.png", "pages/page-00.png", "pages/page-16.png"
     ];
 
@@ -428,116 +525,116 @@
     window.addEventListener('resize', resizeReader);
     mobileQuery.addEventListener('change', resizeReader);
 
-// Adjust this to change the page-turn speed (milliseconds).
-const FLIP_DURATION = 1350;
+    // Adjust this to change the page-turn speed (milliseconds).
+    const FLIP_DURATION = 1350;
 
-function turn(direction) {
-  const lastSpread = Math.ceil(pageImages.length / stepSize()) - 1;
-  if (isZoomed() || turning || spread + direction < (singlePage ? 1 : 0) || spread + direction > lastSpread) return;
-  turning = true;
-  const target = spread + direction;
-  pendingTarget = target;
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    spread = target;
-    drawSpread();
-    turning = false;
-    pendingTarget = null;
-    return;
-  }
-  const openingCover = !singlePage && spread === 0;
-  const closingCover = !singlePage && target === 0;
-  const closingBackCover = !singlePage && target === lastSpread;
-  const openingBackCover = !singlePage && spread === lastSpread;
-  book.classList.remove('cover-only', 'back-cover-only');
-  const width = book.clientWidth / stepSize();
-  const height = book.clientHeight;
-  const segmentCount = 24;
-  const segmentWidth = width / segmentCount;
-  const mesh = document.createElement('div');
-  mesh.className = 'paper-mesh';
-  mesh.setAttribute('aria-hidden', 'true');
-  const shadow = document.createElement('div');
-  shadow.className = 'turn-shadow';
-  const frontIndex = singlePage ? (direction > 0 ? spread : target) : (direction > 0 ? spread * 2 + 1 : target * 2 + 1);
-  const backIndex = direction > 0 ? target * 2 : spread * 2;
-  const frontPage = makePage(frontIndex);
-  const backPage = singlePage ? document.createElement('article') : makePage(backIndex);
-  if (singlePage) backPage.className = 'page';
-  const strips = [];
-  for (let i = 0; i < segmentCount; i++) {
-    const strip = document.createElement('div');
-    strip.className = 'paper-strip';
-    strip.style.width = (segmentWidth + 0.8) + 'px';
-    for (const reverse of [false, true]) {
-      const face = document.createElement('div');
-      face.className = 'paper-face' + (reverse ? ' reverse' : '');
-      const page = (reverse ? backPage : frontPage).cloneNode(true);
-      page.style.width = width + 'px';
-      page.style.height = height + 'px';
-      page.style.left = -(reverse ? width - (i + 1) * segmentWidth : i * segmentWidth) + 'px';
-      face.append(page);
-      strip.append(face);
+    function turn(direction) {
+      const lastSpread = Math.ceil(pageImages.length / stepSize()) - 1;
+      if (isZoomed() || turning || spread + direction < (singlePage ? 1 : 0) || spread + direction > lastSpread) return;
+      turning = true;
+      const target = spread + direction;
+      pendingTarget = target;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        spread = target;
+        drawSpread();
+        turning = false;
+        pendingTarget = null;
+        return;
+      }
+      const openingCover = !singlePage && spread === 0;
+      const closingCover = !singlePage && target === 0;
+      const closingBackCover = !singlePage && target === lastSpread;
+      const openingBackCover = !singlePage && spread === lastSpread;
+      book.classList.remove('cover-only', 'back-cover-only');
+      const width = book.clientWidth / stepSize();
+      const height = book.clientHeight;
+      const segmentCount = 24;
+      const segmentWidth = width / segmentCount;
+      const mesh = document.createElement('div');
+      mesh.className = 'paper-mesh';
+      mesh.setAttribute('aria-hidden', 'true');
+      const shadow = document.createElement('div');
+      shadow.className = 'turn-shadow';
+      const frontIndex = singlePage ? (direction > 0 ? spread : target) : (direction > 0 ? spread * 2 + 1 : target * 2 + 1);
+      const backIndex = direction > 0 ? target * 2 : spread * 2;
+      const frontPage = makePage(frontIndex);
+      const backPage = singlePage ? document.createElement('article') : makePage(backIndex);
+      if (singlePage) backPage.className = 'page';
+      const strips = [];
+      for (let i = 0; i < segmentCount; i++) {
+        const strip = document.createElement('div');
+        strip.className = 'paper-strip';
+        strip.style.width = (segmentWidth + 0.8) + 'px';
+        for (const reverse of [false, true]) {
+          const face = document.createElement('div');
+          face.className = 'paper-face' + (reverse ? ' reverse' : '');
+          const page = (reverse ? backPage : frontPage).cloneNode(true);
+          page.style.width = width + 'px';
+          page.style.height = height + 'px';
+          page.style.left = -(reverse ? width - (i + 1) * segmentWidth : i * segmentWidth) + 'px';
+          face.append(page);
+          strip.append(face);
+        }
+        mesh.append(strip);
+        strips.push(strip);
+      }
+      function pose(progress) {
+        if (openingCover || closingCover) {
+          const closed = openingCover ? 1 - progress : progress;
+          book.style.setProperty('--cover-offset', (-25 * closed) + '%');
+          book.style.setProperty('--back-left', (50 * closed) + '%');
+        }
+        if (closingBackCover || openingBackCover) {
+          const closed = closingBackCover ? progress : 1 - progress;
+          book.style.setProperty('--cover-offset', (25 * closed) + '%');
+          book.style.setProperty('--back-right', (50 * closed) + '%');
+        }
+        const t = direction > 0 ? progress : 1 - progress;
+        const bend = Math.sin(Math.PI * t) * 1.50 * direction;
+        let x = 0, z = 0;
+        strips.forEach((strip, i) => {
+          // Curvature travels from the binding to the outer edge and settles flat.
+          const u = (i + 0.5) / segmentCount;
+          const angle = -Math.PI * t + bend * (u - 0.25);
+          strip.style.transform = 'translate3d(' + x + 'px,0,' + z + 'px) rotateY(' + angle + 'rad)';
+          strip.style.setProperty('--shade', Math.sin(Math.PI * t) * (0.04 + 0.15 * u));
+          x += segmentWidth * Math.cos(angle);
+          z -= segmentWidth * Math.sin(angle);
+        });
+        shadow.style.opacity = Math.sin(Math.PI * t) * 0.55;
+      }
+      pose(0);
+      book.append(shadow, mesh);
+      if (singlePage) right.replaceChildren(makePage(direction > 0 ? target : spread));
+      else if (closingBackCover) right.replaceChildren();
+      else if (openingBackCover) {
+        left.replaceChildren(makePage(target * 2));
+        right.replaceChildren(makePage(target * 2 + 1));
+      }
+      else if (direction > 0) right.replaceChildren(makePage(target * 2 + 1));
+      else if (closingCover) {
+        left.replaceChildren();
+        right.replaceChildren(makePage(1));
+      } else left.replaceChildren(makePage(target * 2));
+      let start;
+      function frame(now) {
+        if (start === undefined) start = now;
+        const elapsed = Math.min(1, (now - start) / FLIP_DURATION);
+        // Smootherstep: gradual lift, continuous motion, and a soft landing.
+        const progress = elapsed * elapsed * elapsed * (elapsed * (elapsed * 6 - 15) + 10);
+        pose(progress);
+        if (elapsed < 1) animationId = requestAnimationFrame(frame);
+        else {
+          spread = target;
+          drawSpread();
+          mesh.remove();
+          shadow.remove();
+          turning = false;
+          pendingTarget = null;
+        }
+      }
+      animationId = requestAnimationFrame(frame);
     }
-    mesh.append(strip);
-    strips.push(strip);
-  }
-  function pose(progress) {
-    if (openingCover || closingCover) {
-      const closed = openingCover ? 1 - progress : progress;
-      book.style.setProperty('--cover-offset', (-25 * closed) + '%');
-      book.style.setProperty('--back-left', (50 * closed) + '%');
-    }
-    if (closingBackCover || openingBackCover) {
-      const closed = closingBackCover ? progress : 1 - progress;
-      book.style.setProperty('--cover-offset', (25 * closed) + '%');
-      book.style.setProperty('--back-right', (50 * closed) + '%');
-    }
-    const t = direction > 0 ? progress : 1 - progress;
-    const bend = Math.sin(Math.PI * t) * 1.50 * direction;
-    let x = 0, z = 0;
-    strips.forEach((strip, i) => {
-      // Curvature travels from the binding to the outer edge and settles flat.
-      const u = (i + 0.5) / segmentCount;
-      const angle = -Math.PI * t + bend * (u - 0.25);
-      strip.style.transform = 'translate3d(' + x + 'px,0,' + z + 'px) rotateY(' + angle + 'rad)';
-      strip.style.setProperty('--shade', Math.sin(Math.PI * t) * (0.04 + 0.15 * u));
-      x += segmentWidth * Math.cos(angle);
-      z -= segmentWidth * Math.sin(angle);
-    });
-    shadow.style.opacity = Math.sin(Math.PI * t) * 0.55;
-  }
-  pose(0);
-  book.append(shadow, mesh);
-  if (singlePage) right.replaceChildren(makePage(direction > 0 ? target : spread));
-  else if (closingBackCover) right.replaceChildren();
-  else if (openingBackCover) {
-    left.replaceChildren(makePage(target * 2));
-    right.replaceChildren(makePage(target * 2 + 1));
-  }
-  else if (direction > 0) right.replaceChildren(makePage(target * 2 + 1));
-  else if (closingCover) {
-    left.replaceChildren();
-    right.replaceChildren(makePage(1));
-  } else left.replaceChildren(makePage(target * 2));
-  let start;
-  function frame(now) {
-    if (start === undefined) start = now;
-    const elapsed = Math.min(1, (now - start) / FLIP_DURATION);
-    // Smootherstep: gradual lift, continuous motion, and a soft landing.
-    const progress = elapsed * elapsed * elapsed * (elapsed * (elapsed * 6 - 15) + 10);
-    pose(progress);
-    if (elapsed < 1) animationId = requestAnimationFrame(frame);
-    else {
-      spread = target;
-      drawSpread();
-      mesh.remove();
-      shadow.remove();
-      turning = false;
-      pendingTarget = null;
-    }
-  }
-  animationId = requestAnimationFrame(frame);
-}
 
     // At normal zoom, use a tap or a deliberate horizontal swipe to turn.
     // Native vertical scrolling and pinch zoom remain available. Once zoomed,
@@ -564,10 +661,8 @@ function turn(direction) {
       const zoomed = isZoomed();
       book.classList.toggle('zoomed', zoomed);
       pageHint.textContent = zoomed
-        ? '目前已放大，翻頁已暫停。可拖曳閱讀，縮回原比例後即可繼續翻頁。'
-        : singlePage
-          ? '輕觸左半頁：上一頁｜輕觸右半頁：下一頁\n向左滑動：下一頁｜向右滑動：上一頁\n雙指可放大閱讀，放大時暫停翻頁。'
-          : '點擊或輕觸左頁返回上一頁，右頁前往下一頁。';
+        ? '已放大，縮回原比例即可翻頁。'
+        : '輕觸左右頁面或左右滑動即可翻頁。';
     }
 
     function cancelGesture() {
@@ -621,24 +716,24 @@ function turn(direction) {
       const gesture = touchGesture;
       touchGesture = null;
       if (!gesture || activeTouches || isZoomed() || turning ||
-          gesture.page !== spread || gesture.singlePage !== singlePage) return;
+        gesture.page !== spread || gesture.singlePage !== singlePage) return;
       const touch = Array.from(event.changedTouches).find(item => item.identifier === gesture.id);
       if (!touch) return;
       const dx = touch.clientX - gesture.x;
       const dy = touch.clientY - gesture.y;
       const duration = Date.now() - gesture.started;
       if (duration <= SWIPE_DURATION && Math.abs(dx) >= SWIPE_DISTANCE &&
-          Math.abs(dx) > Math.abs(dy) * SWIPE_RATIO) {
+        Math.abs(dx) > Math.abs(dy) * SWIPE_RATIO) {
         turn(dx < 0 ? 1 : -1); // Swipe left = next; swipe right = previous.
         return;
       }
       if (!gesture.allowTap || gesture.moved || duration > TAP_DURATION ||
-          Math.hypot(dx, dy) > TAP_DISTANCE) return;
+        Math.hypot(dx, dy) > TAP_DISTANCE) return;
       // A second tap, pinch, scroll, resize, or zoom change cancels this delay.
       tapTimer = setTimeout(() => {
         tapTimer = null;
         if (!activeTouches && !isZoomed() && !turning && document.visibilityState !== 'hidden' &&
-            gesture.page === spread && gesture.singlePage === singlePage) turn(gesture.direction);
+          gesture.page === spread && gesture.singlePage === singlePage) turn(gesture.direction);
       }, TAP_DELAY);
     }, { passive: true, capture: true });
 
