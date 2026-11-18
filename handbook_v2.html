@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BOYING INTERNATIONAL CLUB</title>
+  <style>
+    /* Change these colors to match your magazine. */
+    :root {
+      --paper: #f1ecdf;
+      --navy: #122c3b;
+      --gold: #bd9a5c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      min-height: 100svh;
+      padding: 16px 0;
+      background: radial-gradient(ellipse at center, #313d47, #141b22 75%);
+    }
+
+    /* One A4 page on phones, tablets, and desktop. */
+    .book {
+      position: relative;
+      width: min(92vw, calc((100vh - 110px) * .70707), 700px);
+      width: min(92vw, calc((100svh - 110px) * .70707), 700px);
+      aspect-ratio: 210 / 297;
+      background: var(--paper);
+      box-shadow: 0 2px 0 #a69e8f, 0 4px 0 #d9d3c5, 0 18px 32px #0006;
+      overflow: hidden;
+      touch-action: pinch-zoom;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+    }
+
+    .book.zoomed {
+      touch-action: auto;
+      cursor: grab;
+    }
+
+    .book:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 6px;
+    }
+
+    .base,
+    .turn-layer {
+      position: absolute;
+      inset: 0;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--navy);
+      container-type: inline-size;
+    }
+
+    .content {
+      height: 100%;
+      padding: 8%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .kicker {
+      font: 2.2cqw Arial, sans-serif;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font: 19cqw/.95 Georgia, serif;
+      letter-spacing: -.04em;
+      margin: 8% 0 4%;
+    }
+
+    h2 {
+      font: 11cqw/1.04 Georgia, serif;
+      letter-spacing: -.04em;
+      margin: 8% 0 5%;
+    }
+
+    h3 {
+      font: 8cqw/1.03 Georgia, serif;
+      margin: 5% 0;
+      font-weight: normal;
+    }
+
+    p {
+      font: 3.3cqw/1.65 Georgia, serif;
+      margin: 3% 0;
+    }
+
+    .folio {
+      margin-top: auto;
+      padding-top: 4%;
+      border-top: 1px solid #bd9a5c77;
+      display: flex;
+      justify-content: space-between;
+      font: 2cqw Arial, sans-serif;
+      letter-spacing: .16em;
+    }
+
+    .dark {
+      color: #e9ddc2;
+      background: var(--navy);
+    }
+
+    .dark .content {
+      background: radial-gradient(ellipse at 80% 50%, #4c77733d, transparent 70%);
+    }
+
+    .rule {
+      border-top: 1px solid #bd9a5c88;
+      padding-top: 4%;
+      font: 2.2cqw Arial;
+      letter-spacing: .25em;
+    }
+
+    .sculpture {
+      position: relative;
+      flex: 1;
+      min-height: 26%;
+      display: grid;
+      place-items: center;
+      margin: 3% 0;
+    }
+
+    .ring {
+      position: absolute;
+      width: 55%;
+      aspect-ratio: 1;
+      border: 1.6cqw solid #bca16c;
+      border-radius: 50%;
+      transform: rotate(-30deg) skewY(-12deg);
+      box-shadow: inset .7cqw .7cqw 1cqw #f4e3b9, 1cqw 2cqw 3cqw #0005;
+    }
+
+    .ring:nth-child(2) {
+      width: 44%;
+      transform: rotate(35deg) skewX(22deg);
+      border-color: #deca9e;
+    }
+
+    .ring:nth-child(3) {
+      width: 29%;
+      transform: rotate(-20deg) skewX(-20deg);
+    }
+
+    .art {
+      height: 42%;
+      margin: 5% 0;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 1;
+      background: linear-gradient(140deg, #8aaba8, #375765 60%, #182d3c);
+    }
+
+    .art::before,
+    .art::after {
+      content: "";
+      position: absolute;
+      width: 70%;
+      height: 160%;
+      border: 2cqw solid #d1bb8e;
+      border-radius: 50% 50% 0 0;
+      top: 13%;
+      left: 8%;
+      transform: rotate(30deg);
+      box-shadow: 1cqw 1cqw 5cqw #0004;
+    }
+
+    .art::after {
+      left: 45%;
+      border-color: #d7d3b877;
+    }
+
+    .number {
+      font: 24cqw/1 Georgia;
+      color: var(--gold);
+      margin-top: 8%;
+    }
+
+    .quote {
+      font: 8cqw/1.2 Georgia;
+      color: var(--gold);
+      margin: 10% 0;
+    }
+
+    .page-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--paper);
+    }
+
+    .turn-layer {
+      pointer-events: none;
+      perspective: 2500px;
+      perspective-origin: 0 0;
+    }
+
+    /* In this rotated coordinate system, local Y runs along the page diagonal. */
+    .paper-mesh {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      transform-style: preserve-3d;
+    }
+
+    .paper-strip,
+    .turn-shadow {
+      position: absolute;
+      top: 0;
+      left: var(--strip-left);
+      width: var(--strip-width);
+    }
+
+    .paper-strip {
+      transform-origin: 0 0;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .paper-face {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .paper-front {
+      transform: translateZ(.1px);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+
+    .paper-back {
+      transform: translateZ(-.1px);
+    }
+
+    .paper-face .page {
+      inset: auto;
+      top: var(--texture-top);
+      left: var(--texture-left);
+      width: var(--page-width);
+      height: var(--page-height);
+      transform: var(--texture-rotation);
+      transform-origin: 0 0;
+    }
+
+    .paper-face .page::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #382e22;
+      opacity: var(--shade, 0);
+    }
+
+    .paper-back .page {
+      background: #eee7d9;
+    }
+
+    .turn-shadow {
+      height: var(--shadow-height);
+      background: linear-gradient(to bottom, #21170c36, #21170c16 35%, transparent);
+    }
+
+    .reader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .page-hint {
+      margin: 0;
+      padding: 0 12px;
+      color: var(--paper);
+      font: 14px/1.55 Arial, sans-serif;
+      text-align: center;
+    }
+
+    .image-error {
+      display: grid;
+      place-content: center;
+      height: 100%;
+      padding: 8%;
+      text-align: center;
+      font: 4cqw/1.6 Arial, sans-serif;
+      overflow-wrap: anywhere;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    @media (max-width: 767px) {
+      .reader {
+        gap: 18px;
+      }
+
+      .page-hint {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="reader">
+    <main class="book" tabindex="0" aria-label="博盈國際會手冊" aria-describedby="page-hint">
+      <div id="base" class="base"></div>
+    </main>
+    <p id="page-hint" class="page-hint">向上滑動翻到下一頁，向下滑動回到上一頁。也可輕觸下半頁前進、上半頁返回。</p>
+  </div>
+  <div id="status" class="sr-only" role="status" aria-atomic="true"></div>
+  <script>
+    // Artwork in reading order, from the front cover to the back cover.
+    // Paths are relative to this HTML file. Empty entries use the sample layout.
+    const pageImages = [
+      "pages/page-0.1.png",
+      "pages/page-01.png",
+      "pages/page-02.png",
+      "pages/page-03.png",
+      "pages/page-04.png",
+      "pages/page-05.png",
+      "pages/page-06.png",
+      "pages/page-07.png",
+      "pages/page-08.png",
+      "pages/page-09.png",
+      "pages/page-10.png",
+      "pages/page-11.png",
+      "pages/page-12.png",
+      "pages/page-13.png",
+      "pages/page-14.png",
+      "pages/page-15.png",
+      "pages/page-16.png"
+    ];
+
+    const titles = [
+      'A new perspective', 'The opening note', 'The art of arrival', 'Details that matter',
+      'A quieter rhythm', 'Spaces to discover', 'The golden hour', 'At the table',
+      'After dark', 'The city edit', 'A personal touch', 'Room to explore',
+      'Your next chapter', 'The collection', 'Until next time', 'A new beginning'
+    ];
+    const copy = [
+      '',
+      'Every journey begins with a fresh perspective. This edition is an invitation to pause, explore and discover the beauty in the details.',
+      'A welcoming space. A thoughtful gesture. A moment to settle in. First impressions are shaped by the small details that make a place feel special.',
+      'A warm material, an elegant curve, a carefully placed light. Good design connects what we see with how we feel.',
+      'Make room for a slower pace. Set aside the schedule and leave a little space for the unexpected.',
+      'Architecture shapes an experience before a word is spoken. Discover the connection between generous spaces, light and human connection.',
+      'As daylight softens, familiar places reveal another side. Warm reflections turn an ordinary moment into something worth remembering.',
+      'A shared table is a place for conversation, discovery and the pleasure of taking your time. Some stories begin with a simple meal.',
+      'When the light changes, so does the mood. An evening unfolds through music, conversation and a different view of the city.',
+      'Take the long way. Follow a new street, look up at the skyline, and find a corner of the city that feels entirely your own.',
+      'The most memorable experiences feel personal. Small, thoughtful details transform a visit into a story.',
+      'Leave a little room for curiosity. The most unexpected discoveries often become the moments we remember best.',
+      'There is always another place to discover, another idea to explore, another page to turn. Where will your curiosity take you next?',
+      'A collection of spaces, textures and moments. A different perspective, gathered together in one considered edition.',
+      'Thank you for exploring this sample edition. Replace these sample pages with your finished artwork to make this magazine your own.',
+      ''
+    ];
+
+    function makePage(index) {
+      const page = document.createElement('article');
+      page.className = 'page' + (index % 4 === 0 || index === pageImages.length - 1 ? ' dark' : '');
+      page.setAttribute('aria-label', '第 ' + (index + 1) + ' 頁');
+      if (pageImages[index]) {
+        const image = new Image();
+        image.className = 'page-image';
+        image.alt = '博盈國際會手冊，第 ' + (index + 1) + ' 頁';
+        image.draggable = false;
+        image.addEventListener('error', () => {
+          const message = document.createElement('div');
+          message.className = 'image-error';
+          message.textContent = '無法載入頁面圖片 ' + pageImages[index];
+          image.replaceWith(message);
+        }, { once: true });
+        image.src = pageImages[index];
+        page.append(image);
+        return page;
+      }
+      const folio = '<div class="folio"><span>BSTAR / THE COLLECTION</span><span>' + String(index + 1).padStart(2, '0') + '</span></div>';
+      const rings = '<div class="sculpture"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>';
+      let body;
+      if (index === 0) {
+        body = '<div class="kicker">The collection / Volume 01</div><h1>BSTAR</h1><div class="rule">PLACES · PEOPLE · POSSIBILITIES</div>' + rings + '<h3>A new<br><em>perspective.</em></h3><p>The design edition</p>';
+      } else if (index === pageImages.length - 1) {
+        body = '<div class="kicker">The collection / Volume 01</div>' + rings + '<h2>Every ending.<br><em>A new beginning.</em></h2><p>BSTAR</p>';
+      } else {
+        body = '<div class="kicker">' + (index < 6 ? 'Discover' : index < 12 ? 'Experience' : 'Reflect') + ' / The collection</div>';
+        if (index % 4 === 1) body += '<div class="number">' + String(index + 1).padStart(2, '0') + '</div>';
+        body += '<h2>' + (titles[index] || ('Page ' + (index + 1))) + '.</h2>';
+        body += index % 4 === 2 ? '<div class="quote">“Find the extraordinary in the everyday.”</div>' : '<div class="art"></div>';
+        body += '<p>' + (copy[index] || '') + '</p>';
+      }
+      page.innerHTML = '<div class="content">' + body + folio + '</div>';
+      return page;
+    }
+
+    const book = document.querySelector('.book');
+    const base = document.getElementById('base');
+    const hint = document.getElementById('page-hint');
+    const status = document.getElementById('status');
+    const normalHint = hint.textContent;
+    const viewport = window.visualViewport;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    // Full page-turn time in milliseconds. A partial drag only animates the distance left.
+    const FLIP_DURATION = 1350;
+    const TAP_SLOP = 9;
+    let current = 0;
+    let flip = null;
+    let gesture = null;
+    let animationFrame = 0;
+    let tapTimer = 0;
+    let wheelTimer = 0;
+    let wheelTotal = 0;
+    let wheelUsed = false;
+    const pointers = new Set();
+
+    function isZoomed() {
+      return (viewport?.scale ?? document.documentElement.clientWidth / window.innerWidth) > 1.01;
+    }
+
+    function updateHint() {
+      const zoomed = isZoomed();
+      book.classList.toggle('zoomed', zoomed);
+      hint.textContent = zoomed ? '已放大，可拖曳閱讀。縮回原比例即可翻頁。' : normalHint;
+    }
+
+    function recordPosition(index) {
+      current = index;
+      status.textContent = '第 ' + (index + 1) + ' 頁，共 ' + pageImages.length + ' 頁';
+      // Load adjacent artwork ahead of the gesture, including when reading backwards.
+      for (const adjacent of [index - 1, index + 1]) {
+        if (pageImages[adjacent]) new Image().src = pageImages[adjacent];
+      }
+    }
+
+    function showPage(index) {
+      base.replaceChildren(makePage(index));
+      recordPosition(index);
+    }
+
+    function element(classes) {
+      const node = document.createElement('div');
+      node.className = classes;
+      return node;
+    }
+
+    function canTurn(direction) {
+      const next = current + direction;
+      return !isZoomed() && next >= 0 && next < pageImages.length;
+    }
+
+    function startCurl(direction) {
+      if (flip || !canTurn(direction)) return false;
+      const target = current + direction;
+      const outgoing = base.firstElementChild;
+      const incoming = makePage(target);
+      // The earlier page is the moving sheet for both directions.
+      const sheet = direction > 0 ? outgoing : incoming;
+      const layer = element('turn-layer');
+      layer.setAttribute('aria-hidden', 'true');
+
+      const { width, height } = book.getBoundingClientRect();
+      const length = Math.hypot(width, height);
+      const halfWidth = width * height / length;
+      const rotation = Math.atan2(-width, height);
+      const radius = length * .14;
+      const mesh = element('paper-mesh');
+      mesh.style.transform = 'rotate(' + rotation + 'rad)';
+      mesh.style.setProperty('--strip-left', -halfWidth + 'px');
+      mesh.style.setProperty('--strip-width', 2 * halfWidth + 'px');
+      mesh.style.setProperty('--texture-left', halfWidth + 'px');
+      mesh.style.setProperty('--texture-rotation', 'rotate(' + -rotation + 'rad)');
+      mesh.style.setProperty('--page-width', width + 'px');
+      mesh.style.setProperty('--page-height', height + 'px');
+      mesh.style.setProperty('--shadow-height', radius * .65 + 'px');
+
+      const shadow = element('turn-shadow');
+      mesh.append(shadow);
+      const strips = [];
+      const count = 54;
+      const step = length / count;
+      for (let i = 0; i < count; i++) {
+        const strip = element('paper-strip');
+        strip.style.height = (step + (i < count - 1 ? .7 : 0)) + 'px';
+        strip.style.setProperty('--texture-top', (-i * step) + 'px');
+        const front = element('paper-face paper-front');
+        const back = element('paper-face paper-back');
+        front.append(sheet.cloneNode(true));
+        back.append(element('page'));
+        strip.append(back, front);
+        mesh.append(strip);
+        strips.push(strip);
+      }
+      layer.append(mesh);
+      flip = { target, direction, progress: 0, layer, shadow, outgoing, incoming, length, radius, step, strips };
+      paintCurl(0);
+      book.append(layer);
+      if (direction > 0) base.replaceChildren(incoming);
+      return true;
+    }
+
+    // The flat part stays exactly on the page. Its tangent meets the round curl
+    // continuously, then the turned-over paper extends away from the moving corner.
+    function curlPoint(distance, radius) {
+      if (distance <= 0) return { along: distance, z: 0 };
+      const angle = Math.min(Math.PI, distance / radius);
+      const tail = Math.max(0, distance - Math.PI * radius);
+      return {
+        along: radius * Math.sin(angle) - tail,
+        z: radius * (1 - Math.cos(angle))
+      };
+    }
+
+    function paintCurl(progress) {
+      flip.progress = progress;
+      const { length, radius, step, strips, shadow } = flip;
+      const pose = flip.direction > 0 ? progress : 1 - progress;
+      const eased = pose ** 3 * (pose * (pose * 6 - 15) + 10);
+      const curlStart = length - eased * (length + 1.15 * radius);
+      let start = curlPoint(-curlStart, radius);
+
+      for (let i = 0; i < strips.length; i++) {
+        const end = curlPoint((i + 1) * step - curlStart, radius);
+        const dy = end.along - start.along;
+        const dz = end.z - start.z;
+        const angle = Math.atan2(dz, dy);
+        const scale = Math.hypot(dy, dz) / step;
+        const strip = strips[i];
+        strip.style.transform = 'translate3d(0,' + (curlStart + start.along) + 'px,' +
+          start.z + 'px) rotateX(' + angle + 'rad) scaleY(' + scale + ')';
+        strip.style.setProperty('--shade', (.23 * Math.sin(angle)).toFixed(4));
+        start = end;
+      }
+
+      // Follow the outer silhouette of the curl with a soft shadow on the revealed page.
+      const outer = curlPoint(Math.min(length - curlStart, Math.PI * radius / 2), radius);
+      const edge = (curlStart + outer.along) * 2500 / (2500 - outer.z);
+      shadow.style.transform = 'translateY(' + edge + 'px)';
+      shadow.style.opacity = Math.sin(Math.PI * eased).toFixed(4);
+    }
+
+    function finishCurl(commit) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+      if (!flip) return;
+      const visible = commit ? flip.incoming : flip.outgoing;
+      if (base.firstElementChild !== visible) base.replaceChildren(visible);
+      if (commit) recordPosition(flip.target);
+      flip.layer.remove();
+      flip = null;
+    }
+
+    function settleCurl(commit) {
+      flip.settleTo = commit;
+      const start = flip.progress;
+      const end = commit ? 1 : 0;
+      const duration = Math.abs(end - start) * FLIP_DURATION;
+      if (reducedMotion.matches || duration < 12) {
+        finishCurl(commit);
+        return;
+      }
+      const began = performance.now();
+      function tick(now) {
+        const t = Math.min(1, (now - began) / duration);
+        paintCurl(start + (end - start) * t);
+        if (t < 1) animationFrame = requestAnimationFrame(tick);
+        else finishCurl(commit);
+      }
+      animationFrame = requestAnimationFrame(tick);
+    }
+
+    function turn(direction) {
+      if (flip || !canTurn(direction)) return;
+      if (reducedMotion.matches) showPage(current + direction);
+      else if (startCurl(direction)) settleCurl(true);
+    }
+
+    function cancelTap() {
+      clearTimeout(tapTimer);
+      tapTimer = 0;
+    }
+
+    function cancelGesture() {
+      cancelTap();
+      if (gesture?.direction && flip) finishCurl(false);
+      gesture = null;
+    }
+
+    // Capture the pointer so a swipe may end beyond the edge of the page.
+    document.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      pointers.add(event.pointerId);
+      const secondTap = Boolean(tapTimer);
+      cancelGesture();
+      if (pointers.size !== 1 || !book.contains(event.target) || flip || isZoomed()) return;
+      book.setPointerCapture(event.pointerId);
+      gesture = {
+        id: event.pointerId, x: event.clientX, y: event.clientY, began: performance.now(),
+        direction: 0, moved: false, allowTap: !secondTap
+      };
+    });
+
+    function track(event) {
+      if (!gesture || event.pointerId !== gesture.id || isZoomed()) return;
+      const dx = event.clientX - gesture.x;
+      const dy = event.clientY - gesture.y;
+      if (!gesture.direction) {
+        if (Math.hypot(dx, dy) <= TAP_SLOP) return;
+        gesture.moved = true;
+        if (Math.abs(dx) > Math.abs(dy) * 1.25) { cancelGesture(); return; }
+        // A diagonal drag along the turn also works when starting away from a corner.
+        const diagonal = dx * dy > 0;
+        if (Math.abs(dy) < Math.abs(dx) * (diagonal ? .85 : 1.25)) return;
+        const direction = dy < 0 ? 1 : -1;
+        if (!canTurn(direction)) { cancelGesture(); return; }
+        gesture.direction = direction;
+        if (!reducedMotion.matches) startCurl(direction);
+      }
+      if (flip) {
+        const fraction = -dy * gesture.direction / (book.clientHeight * .85);
+        paintCurl(Math.min(1, Math.max(0, fraction)));
+      }
+    }
+
+    book.addEventListener('pointermove', track);
+    document.addEventListener('pointerup', event => {
+      pointers.delete(event.pointerId);
+      if (event.pointerId !== gesture?.id) return;
+      track(event);
+      if (!gesture || isZoomed()) { cancelGesture(); return; }
+      const g = gesture;
+      gesture = null;
+      if (g.direction) {
+        const distance = (g.y - event.clientY) * g.direction;
+        const threshold = Math.min(60, Math.max(30, book.clientHeight * .10));
+        const commit = distance >= threshold;
+        if (flip) settleCurl(commit);
+        else if (commit) turn(g.direction);
+        return;
+      }
+      if (g.moved || !g.allowTap || performance.now() - g.began > 450) return;
+      const bounds = book.getBoundingClientRect();
+      const direction = event.clientY < bounds.top + bounds.height / 2 ? -1 : 1;
+      if (event.pointerType === 'mouse') turn(direction);
+      else tapTimer = setTimeout(() => { tapTimer = 0; turn(direction); }, 320);
+    });
+
+    document.addEventListener('pointercancel', event => {
+      pointers.delete(event.pointerId);
+      cancelGesture();
+    });
+    book.addEventListener('lostpointercapture', event => {
+      if (gesture?.id === event.pointerId) cancelGesture();
+    });
+
+    // A continuous trackpad or mouse-wheel gesture turns one page.
+    book.addEventListener('wheel', event => {
+      if (event.ctrlKey || event.metaKey || isZoomed() || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      cancelTap();
+      clearTimeout(wheelTimer);
+      wheelTimer = setTimeout(() => { wheelTotal = 0; wheelUsed = false; }, 220);
+      if (wheelUsed || gesture || flip) return;
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? book.clientHeight : 1;
+      wheelTotal += event.deltaY * unit;
+      if (Math.abs(wheelTotal) < 32) return;
+      wheelUsed = true;
+      turn(Math.sign(wheelTotal));
+    }, { passive: false });
+
+    document.addEventListener('keydown', event => {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || isZoomed() || gesture) return;
+      const direction = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1 }[event.key];
+      if (!direction) return;
+      event.preventDefault();
+      cancelTap();
+      if (!event.repeat) turn(direction);
+    });
+
+    function resetInput() {
+      pointers.clear();
+      cancelGesture();
+    }
+    window.addEventListener('blur', resetInput);
+    document.addEventListener('visibilitychange', resetInput);
+    window.addEventListener('resize', () => {
+      cancelGesture();
+      // Settle a released turn before the captured strip dimensions become stale.
+      if (flip) finishCurl(flip.settleTo);
+    });
+    if (viewport) {
+      viewport.addEventListener('resize', () => { cancelGesture(); updateHint(); });
+      viewport.addEventListener('scroll', cancelGesture);
+    }
+
+    showPage(0);
+    updateHint();
+  </script>
+</body>
+
+</html>
