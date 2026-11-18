@@ -660,6 +660,7 @@
     function updateNavigationHint() {
       const zoomed = isZoomed();
       book.classList.toggle('zoomed', zoomed);
+
       pageHint.textContent = zoomed
         ? '已放大，縮回原比例即可翻頁。'
         : '輕觸左右頁面或左右滑動即可翻頁。';
