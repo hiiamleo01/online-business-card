@@ -39,7 +39,7 @@
       position: relative;
       width: min(90vw, calc((100vh - 120px) * 1.41414), 1400px);
       width: min(90vw, calc((100svh - 120px) * 1.41414), 1400px);
-      touch-action: auto;
+      touch-action: pan-y pinch-zoom;
       aspect-ratio: 420 / 297;
       perspective: 2500px;
       filter: drop-shadow(0 24px 25px #0007);
@@ -249,43 +249,23 @@
       align-items: center;
       gap: 26px;
     }
-    .navigation {
-      display: none;
-      justify-content: center;
-      gap: 16px;
-      position: relative;
-      z-index: 20;
-    }
     .page-hint {
       margin: 0;
       padding: 0 20px;
+      max-width: min(92vw, 640px);
       color: var(--paper);
       font: 15px/1.6 Arial, sans-serif;
       text-align: center;
+      white-space: pre-line;
     }
-    .book:not(.single-page) .base { cursor: pointer; }
+    .book .base { cursor: pointer; }
+    .book.zoomed { touch-action: auto; }
+    .book.zoomed .base { cursor: grab; }
     .book:focus-visible { outline: 2px solid var(--gold); outline-offset: 10px; }
     @media (max-width: 767px) {
-      .navigation { display: flex; }
-      .page-hint { display: none; }
+      .reader { gap: 18px; }
+      .page-hint { padding: 0 12px; font-size: 13px; min-height: 4.8em; }
     }
-    .turn {
-      min-width: 120px;
-      min-height: 48px;
-      padding: 12px 20px;
-      border: 1px solid var(--gold);
-      border-radius: 8px;
-      background: var(--navy);
-      color: var(--paper);
-      font: 600 15px/1.3 Arial, sans-serif;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-    @media (hover: hover) {
-      .turn:hover:not(:disabled) { background: #244657; }
-    }
-    .turn:disabled { opacity: .4; cursor: default; }
-    .turn:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
 
     .sr-only {
       position: absolute;
@@ -302,7 +282,6 @@
       width: min(92vw, calc((100svh - 120px) * .70707), 700px);
       aspect-ratio: 210 / 297;
       overflow: hidden;
-      touch-action: auto;
     }
     .single-page .base { width: 100%; }
     .single-page .base.left { display: none; }
@@ -319,15 +298,11 @@
 
 <body>
   <div class="reader">
-  <main class="book" aria-label="Magazine with front cover, interior spreads, and back cover">
+  <main class="book" tabindex="0" aria-describedby="page-hint" aria-label="Magazine with front cover, interior spreads, and back cover">
     <div id="left" class="base left"></div>
     <div id="right" class="base right"></div>
   </main>
-  <p id="page-hint" class="page-hint" lang="zh-Hant">點擊或輕觸左頁返回上一頁，右頁前往下一頁。</p>
-  <nav class="navigation" aria-label="Magazine navigation">
-    <button type="button" id="previous" class="turn prev">← 上一页</button>
-    <button type="button" id="next" class="turn next">下一页 →</button>
-  </nav>
+  <p id="page-hint" class="page-hint" lang="zh-Hant-TW">點擊或輕觸左頁返回上一頁，右頁前往下一頁。</p>
   </div>
   <div id="status" class="sr-only" aria-live="polite"></div>
   <script>
@@ -369,8 +344,8 @@
     const book = document.querySelector('.book');
     const left = document.getElementById('left');
     const right = document.getElementById('right');
-    const previous = document.getElementById('previous');
-    const next = document.getElementById('next');
+    const pageHint = document.getElementById('page-hint');
+    const viewport = window.visualViewport;
     // At widths below 768px, each navigation step is one page.
     const mobileQuery = matchMedia('(max-width: 767px)');
     let singlePage = mobileQuery.matches;
@@ -388,6 +363,7 @@
         const image = new Image();
         image.className = 'page-image';
         image.alt = 'Magazine page ' + (index + 1);
+        image.draggable = false;
         image.src = pageImages[index];
         page.append(image);
         return page;
@@ -412,9 +388,6 @@
 
     function drawSpread() {
       book.classList.toggle('single-page', singlePage);
-      book.tabIndex = singlePage ? -1 : 0;
-      if (singlePage) book.removeAttribute('aria-describedby');
-      else book.setAttribute('aria-describedby', 'page-hint');
       const cover = !singlePage && spread === 0;
       const backCover = !singlePage && spread === Math.ceil(pageImages.length / 2) - 1;
       book.classList.toggle('cover-only', cover);
@@ -433,10 +406,7 @@
         left.replaceChildren(makePage(first));
         right.replaceChildren(makePage(first + 1));
       }
-      previous.disabled = spread === (singlePage ? 1 : 0);
-      next.disabled = spread === Math.ceil(pageImages.length / stepSize()) - 1;
-      previous.setAttribute('aria-label', singlePage ? 'Previous page' : 'Previous two pages');
-      next.setAttribute('aria-label', singlePage ? 'Next page' : 'Next two pages');
+      updateNavigationHint();
       document.getElementById('status').textContent = singlePage
         ? 'Page ' + first + ' of ' + (pageImages.length - 1)
         : cover ? 'Front cover' : backCover ? 'Back cover' : 'Pages ' + (first + 1) + ' and ' + Math.min(first + 2, pageImages.length) + ' of ' + pageImages.length;
@@ -444,6 +414,7 @@
 
     // Preserve the reading position when rotating or resizing the screen.
     function resizeReader() {
+      cancelGesture();
       const position = pendingTarget === null ? spread : pendingTarget;
       const page = !singlePage && position === 0 ? 1 : position * stepSize();
       cancelAnimationFrame(animationId);
@@ -462,10 +433,8 @@ const FLIP_DURATION = 1350;
 
 function turn(direction) {
   const lastSpread = Math.ceil(pageImages.length / stepSize()) - 1;
-  if (turning || spread + direction < (singlePage ? 1 : 0) || spread + direction > lastSpread) return;
+  if (isZoomed() || turning || spread + direction < (singlePage ? 1 : 0) || spread + direction > lastSpread) return;
   turning = true;
-  previous.disabled = true;
-  next.disabled = true;
   const target = spread + direction;
   pendingTarget = target;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -570,18 +539,138 @@ function turn(direction) {
   animationId = requestAnimationFrame(frame);
 }
 
-    previous.addEventListener('click', () => turn(-1));
-    next.addEventListener('click', () => turn(1));
-    // Desktop: click/tap the left or right page. Mobile keeps its buttons.
-    left.addEventListener('click', () => { if (!singlePage) turn(-1); });
-    right.addEventListener('click', () => { if (!singlePage) turn(1); });
+    // At normal zoom, use a tap or a deliberate horizontal swipe to turn.
+    // Native vertical scrolling and pinch zoom remain available. Once zoomed,
+    // all page turns are blocked and native panning works in both directions.
+    const TAP_DISTANCE = 10;
+    const TAP_DURATION = 450;
+    const TAP_DELAY = 350;
+    const SWIPE_DISTANCE = 50;
+    const SWIPE_DURATION = 900;
+    const SWIPE_RATIO = 1.5;
+    let touchGesture = null;
+    let tapTimer = null;
+    let activeTouches = 0;
+    let ignoreClickUntil = 0;
+
+    function isZoomed() {
+      const scale = viewport && viewport.scale > 0
+        ? viewport.scale
+        : document.documentElement.clientWidth / Math.max(1, window.innerWidth);
+      return scale > 1.01; // Allow for tiny floating-point differences at 100%.
+    }
+
+    function updateNavigationHint() {
+      const zoomed = isZoomed();
+      book.classList.toggle('zoomed', zoomed);
+      pageHint.textContent = zoomed
+        ? '目前已放大，翻頁已暫停。可拖曳閱讀，縮回原比例後即可繼續翻頁。'
+        : singlePage
+          ? '輕觸左半頁：上一頁｜輕觸右半頁：下一頁\n向左滑動：下一頁｜向右滑動：上一頁\n雙指可放大閱讀，放大時暫停翻頁。'
+          : '點擊或輕觸左頁返回上一頁，右頁前往下一頁。';
+    }
+
+    function cancelGesture() {
+      clearTimeout(tapTimer);
+      tapTimer = null;
+      touchGesture = null;
+    }
+
+    function pageDirection(target, clientX) {
+      const base = target.closest('.base');
+      if (!base || !book.contains(base)) return 0;
+      if (!singlePage) return base === left ? -1 : 1;
+      const bounds = book.getBoundingClientRect();
+      return clientX < bounds.left + bounds.width / 2 ? -1 : 1;
+    }
+
+    // A second finger anywhere cancels navigation. Passive listeners preserve
+    // native zooming and scrolling; CSS reserves horizontal movement at 100%.
+    document.addEventListener('touchstart', event => {
+      activeTouches = event.touches.length;
+      ignoreClickUntil = Date.now() + 1000;
+      const doubleTap = tapTimer !== null;
+      cancelGesture();
+      if (activeTouches !== 1 || isZoomed() || turning) return;
+      const touch = event.touches[0];
+      const direction = pageDirection(event.target, touch.clientX);
+      if (!direction) return;
+      touchGesture = {
+        id: touch.identifier, x: touch.clientX, y: touch.clientY,
+        started: Date.now(), direction, page: spread, singlePage,
+        moved: false, allowTap: !doubleTap
+      };
+    }, { passive: true, capture: true });
+
+    document.addEventListener('touchmove', event => {
+      activeTouches = event.touches.length;
+      ignoreClickUntil = Date.now() + 1000;
+      if (!touchGesture) return;
+      const touch = Array.from(event.touches).find(item => item.identifier === touchGesture.id);
+      if (activeTouches !== 1 || !touch || isZoomed()) { cancelGesture(); return; }
+      const dx = Math.abs(touch.clientX - touchGesture.x);
+      const dy = Math.abs(touch.clientY - touchGesture.y);
+      if (Math.hypot(dx, dy) > TAP_DISTANCE) touchGesture.moved = true;
+      // A vertical drag belongs to native scrolling, even if it later turns sideways.
+      if (dy > TAP_DISTANCE && dy >= dx) cancelGesture();
+    }, { passive: true, capture: true });
+
+    document.addEventListener('touchend', event => {
+      activeTouches = event.touches.length;
+      ignoreClickUntil = Date.now() + 1000;
+      const gesture = touchGesture;
+      touchGesture = null;
+      if (!gesture || activeTouches || isZoomed() || turning ||
+          gesture.page !== spread || gesture.singlePage !== singlePage) return;
+      const touch = Array.from(event.changedTouches).find(item => item.identifier === gesture.id);
+      if (!touch) return;
+      const dx = touch.clientX - gesture.x;
+      const dy = touch.clientY - gesture.y;
+      const duration = Date.now() - gesture.started;
+      if (duration <= SWIPE_DURATION && Math.abs(dx) >= SWIPE_DISTANCE &&
+          Math.abs(dx) > Math.abs(dy) * SWIPE_RATIO) {
+        turn(dx < 0 ? 1 : -1); // Swipe left = next; swipe right = previous.
+        return;
+      }
+      if (!gesture.allowTap || gesture.moved || duration > TAP_DURATION ||
+          Math.hypot(dx, dy) > TAP_DISTANCE) return;
+      // A second tap, pinch, scroll, resize, or zoom change cancels this delay.
+      tapTimer = setTimeout(() => {
+        tapTimer = null;
+        if (!activeTouches && !isZoomed() && !turning && document.visibilityState !== 'hidden' &&
+            gesture.page === spread && gesture.singlePage === singlePage) turn(gesture.direction);
+      }, TAP_DELAY);
+    }, { passive: true, capture: true });
+
+    document.addEventListener('touchcancel', event => {
+      activeTouches = event.touches.length;
+      ignoreClickUntil = Date.now() + 1000;
+      cancelGesture();
+    }, { passive: true, capture: true });
+
+    // Mouse clicks stay immediate; synthesized touch clicks must not turn twice.
+    book.addEventListener('click', event => {
+      if (Date.now() < ignoreClickUntil || event.sourceCapabilities?.firesTouchEvents || isZoomed()) return;
+      const direction = pageDirection(event.target, event.clientX);
+      if (direction) turn(direction);
+    });
     book.addEventListener('keydown', event => {
-      if (singlePage || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        if (isZoomed()) return; // Arrow keys may pan the zoomed page instead.
         event.preventDefault();
+        cancelGesture();
         turn(event.key === 'ArrowLeft' ? -1 : 1);
       }
     });
+
+    window.addEventListener('scroll', cancelGesture, { passive: true });
+    window.addEventListener('blur', () => { activeTouches = 0; cancelGesture(); });
+    document.addEventListener('visibilitychange', () => { activeTouches = 0; cancelGesture(); });
+    if (viewport) {
+      viewport.addEventListener('resize', () => { cancelGesture(); updateNavigationHint(); }, { passive: true });
+      viewport.addEventListener('scroll', cancelGesture, { passive: true });
+    }
 
     // Preload supplied artwork for smooth page turns.
     pageImages.filter(Boolean).forEach(src => { const image = new Image(); image.src = src; });
